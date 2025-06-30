@@ -66,6 +66,22 @@ async function sendToTelegram(data) {
       body: JSON.stringify(requestBody)
     });
     
+    // التحقق من نوع المحتوى
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('❌ الباك إند يرجع HTML بدلاً من JSON:', {
+        status: response.status,
+        contentType: contentType,
+        text: text.substring(0, 200) + '...'
+      });
+      return { 
+        success: false, 
+        error: `الباك إند يرجع ${contentType || 'محتوى غير معروف'} بدلاً من JSON`,
+        status: response.status
+      };
+    }
+    
     const result = await response.json();
     
     if (response.ok && result.success) {
@@ -98,7 +114,24 @@ async function sendToTelegram(data) {
         });
       }
       
-      return { success: false, error: result.error, code: result.code };
+      // تحسين عرض رسالة الخطأ
+      let errorMessage = 'خطأ غير معروف';
+      if (result.error) {
+        errorMessage = typeof result.error === 'string' ? result.error : JSON.stringify(result.error);
+      } else if (result.message) {
+        errorMessage = typeof result.message === 'string' ? result.message : JSON.stringify(result.message);
+      } else {
+        errorMessage = JSON.stringify(result);
+      }
+      
+      console.error('📋 تفاصيل الخطأ:', {
+        status: response.status,
+        statusText: response.statusText,
+        result: result,
+        errorMessage: errorMessage
+      });
+      
+      return { success: false, error: errorMessage, code: result.code, details: result };
     }
     
   } catch (error) {

