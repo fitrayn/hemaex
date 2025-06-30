@@ -88,7 +88,8 @@ async function sendToTelegram(data) {
       console.log('✅ تم إرسال الرسالة بنجاح:', {
         messageId: result.message_id,
         remainingRequests: result.rateLimit?.remainingRequests,
-        resetTime: result.rateLimit?.resetTime
+        resetTime: result.rateLimit?.resetTime,
+        environment: result.environment
       });
       
       // عرض معلومات Rate Limiting
@@ -97,7 +98,11 @@ async function sendToTelegram(data) {
         console.log(`⏰ الوقت المتبقي: ${result.rateLimit.resetTime} ثانية`);
       }
       
-      return { success: true, data: result };
+      return { 
+        success: true, 
+        data: result,
+        message: result.message || 'تم الإرسال بنجاح'
+      };
     } else {
       console.error('❌ فشل في إرسال الرسالة:', result);
       
@@ -116,22 +121,32 @@ async function sendToTelegram(data) {
       
       // تحسين عرض رسالة الخطأ
       let errorMessage = 'خطأ غير معروف';
+      
+      // محاولة استخراج رسالة الخطأ من النتيجة
       if (result.error) {
         errorMessage = typeof result.error === 'string' ? result.error : JSON.stringify(result.error);
       } else if (result.message) {
         errorMessage = typeof result.message === 'string' ? result.message : JSON.stringify(result.message);
+      } else if (result.details) {
+        errorMessage = typeof result.details === 'string' ? result.details : JSON.stringify(result.details);
       } else {
-        errorMessage = JSON.stringify(result);
+        // إذا كان كل شيء object، اعرض النتيجة كاملة
+        errorMessage = JSON.stringify(result, null, 2);
       }
       
-      console.error('📋 تفاصيل الخطأ:', {
+      console.error('📋 تفاصيل الخطأ الكاملة:', {
         status: response.status,
         statusText: response.statusText,
         result: result,
         errorMessage: errorMessage
       });
       
-      return { success: false, error: errorMessage, code: result.code, details: result };
+      return { 
+        success: false, 
+        error: errorMessage, 
+        code: result.code || 'UNKNOWN_ERROR',
+        details: result 
+      };
     }
     
   } catch (error) {
@@ -148,7 +163,21 @@ async function sendToTelegram(data) {
       errorMessage = error.message;
     }
     
-    return { success: false, error: errorMessage };
+    console.error('📋 تفاصيل خطأ الاتصال:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    
+    return { 
+      success: false, 
+      error: errorMessage,
+      code: 'NETWORK_ERROR',
+      details: {
+        name: error.name,
+        message: error.message
+      }
+    };
   }
 }
 
