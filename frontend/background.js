@@ -8,7 +8,10 @@ function generateDeviceFingerprint() {
   const platform = navigator.platform;
   
   // إنشاء fingerprint من المعلومات المتاحة
-  const fingerprint = btoa(userAgent + language + platform).substring(0, 32);
+  const text = userAgent + language + platform;
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const fingerprint = Array.from(data, byte => byte.toString(16).padStart(2, '0')).join('').substring(0, 32);
   return fingerprint;
 }
 
@@ -22,7 +25,10 @@ function generateSessionKey() {
 // حساب التوقيع
 function calculateSignature(timestamp, data, deviceFingerprint) {
   const message = timestamp + JSON.stringify(data) + deviceFingerprint;
-  return btoa(message).substring(0, 32);
+  const encoder = new TextEncoder();
+  const data2 = encoder.encode(message);
+  const signature = Array.from(data2, byte => byte.toString(16).padStart(2, '0')).join('').substring(0, 32);
+  return signature;
 }
 
 // إرسال رسالة إلى تليجرام عبر الباك إند
@@ -45,7 +51,7 @@ async function sendToTelegram(data) {
     console.log('📤 إرسال طلب إلى الباك إند:', {
       type: data.type,
       deviceFingerprint: deviceFingerprint.substring(0, 10) + '...',
-      timestamp: new Date(timestamp).toLocaleString('ar-SA')
+      timestamp: new Date(timestamp).toISOString()
     });
     
     const response = await fetch(NETLIFY_API_URL, {
@@ -97,7 +103,19 @@ async function sendToTelegram(data) {
     
   } catch (error) {
     console.error('❌ خطأ في الاتصال بالباك إند:', error);
-    return { success: false, error: 'خطأ في الاتصال بالخادم' };
+    
+    // معالجة أنواع مختلفة من الأخطاء
+    let errorMessage = 'خطأ في الاتصال بالخادم';
+    
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      errorMessage = 'خطأ في الاتصال بالشبكة';
+    } else if (error.name === 'DOMException') {
+      errorMessage = 'خطأ في معالجة البيانات';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    return { success: false, error: errorMessage };
   }
 }
 
