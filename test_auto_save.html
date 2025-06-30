@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Save Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .switch-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.enabled {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disabled {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .log {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Auto Save Test</h2>
+        
+        <div class="switch-container">
+            <span>Card Auto Save</span>
+            <label class="switch">
+                <input type="checkbox" id="cardAutoSaveToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <div id="status" class="status disabled">
+            ❌ Auto Save معطل
+        </div>
+        
+        <div class="log" id="log">
+            <div>Log will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate chrome.storage.local
+        const mockStorage = {
+            data: {},
+            get: function(keys, callback) {
+                const result = {};
+                if (Array.isArray(keys)) {
+                    keys.forEach(key => {
+                        result[key] = this.data[key];
+                    });
+                } else {
+                    result[keys] = this.data[keys];
+                }
+                callback(result);
+            },
+            set: function(data, callback) {
+                Object.assign(this.data, data);
+                if (callback) callback();
+            }
+        };
+
+        // Mock chrome API
+        window.chrome = {
+            storage: {
+                local: mockStorage
+            }
+        };
+
+        const toggle = document.getElementById('cardAutoSaveToggle');
+        const status = document.getElementById('status');
+        const log = document.getElementById('log');
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateStatus() {
+            if (toggle.checked) {
+                status.textContent = '✅ Auto Save مفعل';
+                status.className = 'status enabled';
+            } else {
+                status.textContent = '❌ Auto Save معطل';
+                status.className = 'status disabled';
+            }
+        }
+
+        // Load saved state
+        chrome.storage.local.get(['cardAutoSave'], (data) => {
+            toggle.checked = data.cardAutoSave === true;
+            updateStatus();
+            addLog(`Loaded Auto Save state: ${data.cardAutoSave}`);
+        });
+
+        // Handle toggle change
+        toggle.addEventListener('change', () => {
+            // Save state
+            chrome.storage.local.set({ 'cardAutoSave': toggle.checked }, () => {
+                addLog(`Saved Auto Save state: ${toggle.checked}`);
+            });
+            
+            // Update status
+            updateStatus();
+            
+            // Show notification
+            const message = toggle.checked ? 'تم تفعيل Auto Save' : 'تم إلغاء تفعيل Auto Save';
+            addLog(`Notification: ${message}`);
+        });
+
+        addLog('Test page loaded');
+    </script>
+</body>
+</html> 

