@@ -68,17 +68,21 @@ async function sendToTelegram(data) {
     
     // التحقق من نوع المحتوى
     const contentType = response.headers.get('content-type');
+    console.log('📡 نوع المحتوى المستلم:', contentType);
+    console.log('📡 حالة الاستجابة:', response.status, response.statusText);
+    
     if (!contentType || !contentType.includes('application/json')) {
       const text = await response.text();
       console.error('❌ الباك إند يرجع HTML بدلاً من JSON:', {
         status: response.status,
         contentType: contentType,
-        text: text.substring(0, 200) + '...'
+        text: text.substring(0, 500) + '...'
       });
       return { 
         success: false, 
-        error: `الباك إند يرجع ${contentType || 'محتوى غير معروف'} بدلاً من JSON`,
-        status: response.status
+        error: `الباك إند يرجع ${contentType || 'محتوى غير معروف'} بدلاً من JSON. الحالة: ${response.status}`,
+        status: response.status,
+        contentType: contentType
       };
     }
     
@@ -104,7 +108,9 @@ async function sendToTelegram(data) {
         message: result.message || 'تم الإرسال بنجاح'
       };
     } else {
-      console.error('❌ فشل في إرسال الرسالة:', result);
+      console.error('❌ فشل في إرسال الرسالة - النتيجة الكاملة:', result);
+      console.error('❌ نوع النتيجة:', typeof result);
+      console.error('❌ محتوى النتيجة:', JSON.stringify(result, null, 2));
       
       // التعامل مع Rate Limiting
       if (result.code === 'RATE_LIMIT_EXCEEDED') {
@@ -119,27 +125,22 @@ async function sendToTelegram(data) {
         });
       }
       
-      // تحسين عرض رسالة الخطأ
+      // تبسيط عرض رسالة الخطأ
       let errorMessage = 'خطأ غير معروف';
       
-      // محاولة استخراج رسالة الخطأ من النتيجة
-      if (result.error) {
-        errorMessage = typeof result.error === 'string' ? result.error : JSON.stringify(result.error);
-      } else if (result.message) {
-        errorMessage = typeof result.message === 'string' ? result.message : JSON.stringify(result.message);
-      } else if (result.details) {
-        errorMessage = typeof result.details === 'string' ? result.details : JSON.stringify(result.details);
+      if (result && typeof result === 'object') {
+        if (result.error) {
+          errorMessage = String(result.error);
+        } else if (result.message) {
+          errorMessage = String(result.message);
+        } else {
+          errorMessage = JSON.stringify(result);
+        }
       } else {
-        // إذا كان كل شيء object، اعرض النتيجة كاملة
-        errorMessage = JSON.stringify(result, null, 2);
+        errorMessage = String(result);
       }
       
-      console.error('📋 تفاصيل الخطأ الكاملة:', {
-        status: response.status,
-        statusText: response.statusText,
-        result: result,
-        errorMessage: errorMessage
-      });
+      console.error('📋 رسالة الخطأ النهائية:', errorMessage);
       
       return { 
         success: false, 
