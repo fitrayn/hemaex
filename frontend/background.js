@@ -1,5 +1,6 @@
 // الإكستنشن محدث - متوافق مع نظام Rate Limiting الجديد
-const NETLIFY_API_URL = 'https://your-netlify-site.netlify.app/.netlify/functions/telegram-api';
+// ✅ تم تحديث الرابط برابط Netlify الفعلي
+const NETLIFY_API_URL = 'https://deluxe-sfogliatella-8f76e0.netlify.app/.netlify/functions/telegram-api';
 
 // توليد معرف فريد للجهاز
 function generateDeviceFingerprint() {
