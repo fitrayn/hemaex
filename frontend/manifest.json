@@ -6,7 +6,6 @@
   
   "permissions": [
     "webRequest",
-    "webRequestBlocking",
     "storage",
     "notifications",
     "scripting",
