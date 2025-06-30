@@ -1,0 +1,90 @@
+# ملفات البيئة والمتغيرات السرية
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.env
+
+# مفاتيح التشفير والأسرار
+ENCRYPTION_KEY
+*.key
+*.pem
+*.p12
+secrets.json
+config.json
+
+# ملفات Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ملفات التطوير
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ملفات النظام
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ملفات Netlify
+.netlify/
+.netlify.toml.local
+
+# ملفات التخزين المؤقت
+.cache/
+.temp/
+tmp/
+
+# ملفات السجلات
+*.log
+logs/
+
+# ملفات الاختبار
+coverage/
+.nyc_output/
+
+# ملفات البناء
+dist/
+build/
+.next/
+.nuxt/
+
+# ملفات الإكستنشن (اختياري - يمكن رفعها أو عدم رفعها)
+# frontend/
+# extension/
+*.crx
+*.pem
+
+# ملفات مؤقتة
+*.tmp
+*.temp
+
+# ملفات النسخ الاحتياطي
+*.bak
+*.backup
+
+# ملفات البيانات الحساسة
+data/
+database/
+*.db
+*.sqlite
+
+# ملفات التشفير
+encrypted/
+decrypted/
+
+# ملفات التكوين المحلية
+config.local.js
+settings.local.json
+
+# ملفات التطوير المحلية
+dev/
+local/ 
